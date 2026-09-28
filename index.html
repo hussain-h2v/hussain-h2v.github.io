@@ -546,5 +546,293 @@ footer .fn{font-family:var(--mono);font-size:.74rem;color:var(--muted-2);letter-
   document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
 })();
 </script>
+   <!-- ======================================================== -->
+<!-- Hussain Vali Portfolio AI Chatbot Widget -->
+<!-- Paste this snippet directly before </body> in index.html -->
+<!-- ======================================================== -->
+<div id="hv-chatbot-root"></div>
+<script>
+(function() {
+  const CONFIG = {
+    botName: "Hussain's AI Assistant",
+    avatarText: "HV",
+    primaryColor: "#d7b26a",
+    welcomeMessage: "Hi there! I am Hussain's AI Assistant. Ask me anything about his 15+ years of experience in VisionPLUS CMS, Mainframe architecture, cards & payments modernization, or consulting availability.",
+    apiUrl: "/api/chat",
+    suggestedQuestions: ["What is Hussain's experience with VisionPLUS?","Tell me about the HSBC Credit Card Flip project","What mainframe tools and tech does he use?","How can I reach Hussain for consulting?"]
+  };
+
+  const style = document.createElement('style');
+  style.innerHTML = `
+    #hv-chat-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: ${CONFIG.primaryColor};
+      color: #090d18;
+      box-shadow: 0 10px 25px -5px rgba(215, 178, 106, 0.4), 0 8px 10px -6px rgba(0,0,0,0.5);
+      border: 2px solid rgba(255,255,255,0.2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #hv-chat-fab:hover {
+      transform: scale(1.08) translateY(-2px);
+      box-shadow: 0 16px 32px -4px rgba(215, 178, 106, 0.55);
+    }
+    #hv-chat-panel {
+      position: fixed;
+      bottom: 96px;
+      right: 24px;
+      width: min(420px, calc(100vw - 32px));
+      height: min(600px, calc(100vh - 120px));
+      background: #111827;
+      border: 1px solid rgba(215, 178, 106, 0.25);
+      border-radius: 18px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 9999;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      animation: hvSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes hvSlideUp {
+      from { opacity: 0; transform: translateY(16px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .hv-chat-header {
+      background: #0c1120;
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(150, 170, 210, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .hv-chat-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #eceff7;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hv-avatar-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #1d2745;
+      border: 1px solid ${CONFIG.primaryColor};
+      color: ${CONFIG.primaryColor};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .hv-chat-close {
+      background: transparent;
+      border: none;
+      color: #98a3bf;
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 1;
+      padding: 4px;
+    }
+    .hv-chat-close:hover { color: #eceff7; }
+    .hv-messages-box {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .hv-msg {
+      max-width: 86%;
+      padding: 11px 14px;
+      border-radius: 14px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .hv-msg-bot {
+      background: #18202f;
+      color: #eceff7;
+      border: 1px solid rgba(150, 170, 210, 0.12);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+    .hv-msg-user {
+      background: ${CONFIG.primaryColor};
+      color: #090d18;
+      font-weight: 500;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .hv-chips-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 8px 16px 12px;
+    }
+    .hv-chip {
+      background: #18202f;
+      color: #d7b26a;
+      border: 1px solid rgba(215, 178, 106, 0.25);
+      border-radius: 14px;
+      font-size: 11.5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .hv-chip:hover {
+      background: rgba(215, 178, 106, 0.15);
+      border-color: #d7b26a;
+    }
+    .hv-input-bar {
+      padding: 12px 14px;
+      background: #0c1120;
+      border-top: 1px solid rgba(150, 170, 210, 0.12);
+      display: flex;
+      gap: 8px;
+    }
+    .hv-input {
+      flex: 1;
+      background: #18202f;
+      border: 1px solid rgba(150, 170, 210, 0.2);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #eceff7;
+      font-size: 13.5px;
+      outline: none;
+    }
+    .hv-input:focus { border-color: ${CONFIG.primaryColor}; }
+    .hv-send-btn {
+      background: ${CONFIG.primaryColor};
+      border: none;
+      border-radius: 10px;
+      width: 40px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #090d18;
+      font-weight: 700;
+    }
+  `;
+  document.head.appendChild(style);
+
+  const container = document.getElementById('hv-chatbot-root');
+  container.innerHTML = `
+    <div id="hv-chat-panel">
+      <div class="hv-chat-header">
+        <div class="hv-chat-title">
+          <div class="hv-avatar-badge">${CONFIG.avatarText}</div>
+          <div>
+            <div>${CONFIG.botName}</div>
+            <div style="font-size: 10.5px; color: #98a3bf; font-weight: normal;">Cards & Payments AI</div>
+          </div>
+        </div>
+        <button class="hv-chat-close" id="hv-close-btn">&times;</button>
+      </div>
+      <div class="hv-messages-box" id="hv-msg-box">
+        <div class="hv-msg hv-msg-bot">${CONFIG.welcomeMessage}</div>
+      </div>
+      <div class="hv-chips-container" id="hv-chips">
+        ${CONFIG.suggestedQuestions.map(q => '<button class="hv-chip" data-q="' + q + '">' + q + '</button>').join('')}
+      </div>
+      <div class="hv-input-bar">
+        <input type="text" class="hv-input" id="hv-user-input" placeholder="Ask Hussain's AI..." />
+        <button class="hv-send-btn" id="hv-send-btn">&#10148;</button>
+      </div>
+    </div>
+    <button id="hv-chat-fab" aria-label="Open chat with Hussain's AI">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+  `;
+
+  let history = [];
+  const panel = document.getElementById('hv-chat-panel');
+  const fab = document.getElementById('hv-chat-fab');
+  const closeBtn = document.getElementById('hv-close-btn');
+  const msgBox = document.getElementById('hv-msg-box');
+  const input = document.getElementById('hv-user-input');
+  const sendBtn = document.getElementById('hv-send-btn');
+  const chips = document.getElementById('hv-chips');
+
+  function toggleChat() {
+    const isHidden = panel.style.display === 'none' || !panel.style.display;
+    panel.style.display = isHidden ? 'flex' : 'none';
+    if (isHidden) input.focus();
+  }
+
+  fab.onclick = toggleChat;
+  closeBtn.onclick = toggleChat;
+
+  async function sendMessage(text) {
+    if (!text || !text.trim()) return;
+    const cleanText = text.trim();
+    
+    // Add User message
+    const userDiv = document.createElement('div');
+    userDiv.className = 'hv-msg hv-msg-user';
+    userDiv.textContent = cleanText;
+    msgBox.appendChild(userDiv);
+    msgBox.scrollTop = msgBox.scrollHeight;
+    input.value = '';
+    chips.style.display = 'none';
+
+    history.push({ role: 'user', content: cleanText });
+
+    // Typing indicator
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'hv-msg hv-msg-bot';
+    typingDiv.textContent = 'Thinking...';
+    msgBox.appendChild(typingDiv);
+    msgBox.scrollTop = msgBox.scrollHeight;
+
+    try {
+      const res = await fetch(CONFIG.apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history })
+      });
+      const data = await res.json();
+      typingDiv.remove();
+
+      const reply = data.text || 'Thank you for your message. Hussain will be happy to connect at hussainvali.b@gmail.com.';
+      const botDiv = document.createElement('div');
+      botDiv.className = 'hv-msg hv-msg-bot';
+      botDiv.innerHTML = reply.replace(/\n/g, '<br/>');
+      msgBox.appendChild(botDiv);
+      history.push({ role: 'model', content: reply });
+      msgBox.scrollTop = msgBox.scrollHeight;
+    } catch (e) {
+      typingDiv.remove();
+      const errDiv = document.createElement('div');
+      errDiv.className = 'hv-msg hv-msg-bot';
+      errDiv.textContent = 'Connection error. Please contact Hussain at hussainvali.b@gmail.com or via LinkedIn.';
+      msgBox.appendChild(errDiv);
+    }
+  }
+
+  sendBtn.onclick = () => sendMessage(input.value);
+  input.onkeydown = (e) => { if (e.key === 'Enter') sendMessage(input.value); };
+  chips.addEventListener('click', (e) => {
+    if (e.target.classList.contains('hv-chip')) {
+      sendMessage(e.target.getAttribute('data-q'));
+    }
+  });
+})();
+</script>
 </body>
 </html>
